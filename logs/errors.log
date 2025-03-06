@@ -1,0 +1,266 @@
+
+Time: 2025.03.01 12.03.56
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.23
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.51
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.02
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.10
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.12
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.58
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 12.03.07
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.08
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.38
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.17
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.06
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.38
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.52
+Domain:localhost
+New Exception:Access denied for user 'root@localhost'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.00
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 15.03.22
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 16.03.44
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 16.03.45
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 16.03.17
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 16.03.48
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: YES)
+
+
+Time: 2025.03.01 16.03.07
+Domain:localhost
+New Exception:Unknown column 'log_wiki.for_account' in 'where clause'
+
+
+Time: 2025.03.01 16.03.14
+Domain:localhost
+New Exception:Unknown column 'log_wiki.for_account' in 'where clause'
+
+
+Time: 2025.03.01 16.03.15
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.01 16.03.40
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.01 16.03.25
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.02 10.03.06
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.03.05 16.03.37
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.03.05 17.03.30
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 18.03.28
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 18.03.47
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 19.03.30
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 20.03.23
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.00
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.10
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.37
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.55
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.51
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.11
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 20.03.05
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.44
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.37
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.42
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.05
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 21.03.41
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 21.03.56
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.45
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.13
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.47
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.58
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.27
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 21.03.04
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
+Time: 2025.03.05 22.03.58
+Domain:localhost
+New Exception:Column 'for_account' in where clause is ambiguous
+
+
+Time: 2025.03.05 22.03.09
+Domain:localhost
+New Exception:You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'AND for_account=1' at line 1
+
+
