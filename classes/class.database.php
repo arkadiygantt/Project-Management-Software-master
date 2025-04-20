@@ -418,17 +418,26 @@ class Database extends Mysql {
         unset($post['issue_links'], $post['issue_links_types'], $post['issue_links_updates'], $post['issue_links_who_is'], $post['orig_issue_links_up']);
         if (empty($errors)) {
             if ($update == true) {
-                $update_info = rtrim($update_info, ",");
+                $update_info = ''; // Инициализируем пустую строку
                 $post['lastupdate'] = time();
                 $id = $this->escape($post['id']);
                 $tid = ticketAbbrParse(url_segment(3));
                 unset($post['id']);
+
                 foreach ($post as $key => $val) {
-                    $update_info.= $key . " = '" . $val . "',";
+                    $escaped_val = $this->escape($val);
+                    $update_info .= $key . " = '" . $escaped_val . "',";
+
                 }
-                $result = $this->query("UPDATE tickets SET $update_info WHERE for_account=" . ACCOUNT_ID . " AND id=$id LIMIT 1");
+                $update_info = rtrim($update_info, ","); // Убираем последнюю запятую
+                if (empty($update_info)) {
+                    $update_info = "lastupdate = '" . $this->escape($post['lastupdate']) . "'"; // Минимальное обновление
+                }
+                $sql = "UPDATE tickets SET $update_info WHERE for_account=" . ACCOUNT_ID . " AND id=$id LIMIT 1";
+
+                $result = $this->query($sql);
                 $this->setTicketLog($this->user_id, $this->project_id, 'update', $tid['id'], $post['description']);
-                $last_id = $id; //insert watchers
+                $last_id = $id;
             } else {
                 $post['for_account'] = ACCOUNT_ID;
                 $project_id = $this->getProjects($this->project_name);
@@ -440,11 +449,11 @@ class Database extends Mysql {
                 } else {
                     $post['timeclosed'] = 0;
                 }
-                $this->setTicketLog($this->user_id, $this->project_id, 'create', $post['ticket_id'], $post['description']);
                 $columns = implode(',', array_keys($post));
                 $values = implode("','", $post);
-                $result = $this->query("INSERT INTO tickets ($columns) VALUES ('$values')");
-                $last_id = $this->conn->insert_id; //insert watchers
+                $sql = "INSERT INTO tickets ($columns) VALUES ('$values')";
+                $result = $this->query($sql);
+                $last_id = $this->conn->insert_id;
             }
 
             $issue_links['ticket_1_id'] = $last_id;
@@ -728,13 +737,21 @@ class Database extends Mysql {
         $user_id = $this->escape($user_id);
         $project_id = $this->escape($project_id);
         $ticket_id = $this->escape($ticket_id);
-        $res = $this->query("INSERT INTO log_tickets (for_account, user_id, project_id, time, event, text, ticket_id) VALUES (" . ACCOUNT_ID . ",$user_id, $project_id, $time, '$event', '$text', $ticket_id)");
+        
+        // Первый запрос с отладкой
+        $sql1 = "INSERT INTO log_tickets (for_account, user_id, project_id, time, event, text, ticket_id) VALUES (" . ACCOUNT_ID . ", $user_id, $project_id, $time, '$event', '$text', $ticket_id)";
+
+        $res = $this->query($sql1);
+        
         if ($res === true) {
             $log_id = $this->conn->insert_id;
+    
+            // Второй запрос с отладкой
+            $sql2 = "SELECT id FROM tickets WHERE project = $project_id AND ticket_id = $ticket_id AND for_account=" . ACCOUNT_ID;
 
-            $ticket_real_id = $this->query("SELECT id FROM tickets WHERE project = $project_id AND ticket_id = $ticket_id AND for_account=" . ACCOUNT_ID);
+            $ticket_real_id = $this->query($sql2);
             $t_id = $ticket_real_id->fetch_row()[0];
-
+    
             $this->setNotifications($user_id, $t_id, $log_id, 0);
         }
     }
@@ -766,9 +783,15 @@ class Database extends Mysql {
         $id = $this->escape($id);
         $values = '';
         if ($what === 0) {
-            $watchers = $this->query("SELECT user_id FROM watchers WHERE ticket_id = $id AND for_account=" . ACCOUNT_ID);
+            $sql1 = "SELECT user_id FROM watchers WHERE ticket_id = $id AND for_account=" . ACCOUNT_ID;
+
+            $watchers = $this->query($sql1);
+
         } else {
-            $watchers = $this->query("SELECT user_id FROM watchers WHERE page_id = $id AND for_account=" . ACCOUNT_ID);
+            $sql1 = "SELECT user_id FROM watchers WHERE page_id = $id AND for_account=" . ACCOUNT_ID;
+
+            $watchers = $this->query($sql1);
+            
         }
         if ($watchers !== false) {
             $usr_ids = array();
@@ -780,20 +803,25 @@ class Database extends Mysql {
                     $values .= " (" . ACCOUNT_ID . ", '$u_id', '$log_id'),";
                 }
             }
+
             $emails = $this->getUserEmailForNotif(array(1, 2));
             $emails = implode(", ", $emails);
             send_notification_emails($emails);
             $values = rtrim($values, ",");
             if (!empty($values)) {
                 if ($what === 0) {
-                    $this->query("INSERT INTO notifications (for_account. user_id, ticket_log_id) VALUES $values");
+                    $sql2 = "INSERT INTO notifications (for_account, user_id, ticket_log_id) VALUES $values";
+                    
+                    $this->query($sql2);
                 } else {
-                    $this->query("INSERT INTO notifications (for_account, user_id, wiki_log_id) VALUES $values");
+                    $sql2 = "INSERT INTO notifications (for_account, user_id, wiki_log_id) VALUES $values";
+                    
+                    $this->query($sql2);
                 }
             }
         }
     }
-
+    
     public function getTicketNotifications($project_id, $user_id, $from, $to) {
         $project_id = $this->escape($project_id);
         $arr = array();
@@ -1779,6 +1807,7 @@ UNION
         $new_insert = '';
         $updated = array();
         $update_values = array();
+        
         for ($i = 0; $i <= $num; $i++) {
             if ((int) $issue_links['issue_links'][$i] > 0 && strlen($issue_links['issue_links_types'][$i]) != 0) {
                 $t_1 = $issue_links['ticket_1_id'];
@@ -1787,7 +1816,7 @@ UNION
                 if ($update === true) {
                     $update_values[] = "ticket_1=$t_1, ticket_2=$t_2, type='$type' WHERE id=" . $issue_links['update'][$i];
                     $updated[] = $issue_links['update'][$i];
-                    if ($issue_links['update'][$i] == '') { //hmm we new for insert
+                    if ($issue_links['update'][$i] == '') { // Новый элемент для вставки
                         $new_insert .= "(" . ACCOUNT_ID . " ,$t_1, $t_2, '$type'),";
                     }
                 } else {
@@ -1795,6 +1824,7 @@ UNION
                 }
             }
         }
+        
         if ($update === true) {
             $origins = explode(',', $issue_links['origins']);
             if (empty($updated)) {
@@ -1805,9 +1835,15 @@ UNION
                 $delete_it = implode(',', $for_delete);
             }
             $delete_it = trim($delete_it, ',');
-            if ($delete_it != '') {
+            
+            // Проверка на пустоту и валидность списка идентификаторов
+            if (!empty($delete_it) && $delete_it != '' && preg_match('/^\d+(,\d+)*$/', $delete_it)) {
                 $this->query("DELETE FROM connected_tickets WHERE id IN ($delete_it) AND for_account=" . ACCOUNT_ID);
+            } else {
+                // Логируем случай, если список пустой или имеет неверный формат
+                error_log("No valid IDs to delete or invalid format: " . $delete_it);
             }
+            
             if (!empty($update_values)) {
                 foreach ($update_values as $update) {
                     $this->query('UPDATE connected_tickets SET ' . $update . ' WHERE for_account=' . ACCOUNT_ID);
@@ -1820,7 +1856,7 @@ UNION
         } else {
             if ($values != '') {
                 $values = rtrim($values, ',');
-                $this->query('INSERT INTO connected_tickets (for_accounts, ticket_1, ticket_2, type) VALUES ' . $values);
+                $this->query('INSERT INTO connected_tickets (for_account, ticket_1, ticket_2, type) VALUES ' . $values);
             }
         }
     }
