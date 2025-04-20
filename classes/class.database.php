@@ -90,13 +90,15 @@ class Database extends Mysql {
             $info_pr = ",(SELECT COUNT(id) FROM tickets WHERE project = projects.id AND tickets.for_account=" . ACCOUNT_ID . ") as num_tickets,(SELECT COUNT(id) FROM log_tickets WHERE project_id = projects.id AND log_tickets.for_account=" . ACCOUNT_ID . ") as num_logs_tickets, (SELECT COUNT(id) FROM users WHERE users.projects LIKE CONCAT('%',projects.id,'%') AND users.for_account=" . ACCOUNT_ID . ") as num_users";
         }
         $result = $this->query("SELECT name, id, abbr, timestamp, sync $info_pr FROM projects" . $where);
-        if ($result->num_rows > 0) {
+        if ($result !== false && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $arr[] = $row;
             }
-            $this->project_id = $arr[0]['id'];
-            $this->project_abbr = $arr[0]['abbr'];
-            $this->project_sync = $arr[0]['sync'];
+            if (!empty($arr)) { // Добавлена проверка
+                $this->project_id = $arr[0]['id'];
+                $this->project_abbr = $arr[0]['abbr'];
+                $this->project_sync = $arr[0]['sync'];
+            }
         }
         return $arr;
     }
@@ -262,7 +264,7 @@ class Database extends Mysql {
         if ($abbr === false || $id === false) {
             $fast_watched_join = '';
             $fast_watched_where = '';
-//Filter Start
+            //Filter Start
             if (isset($parameters['order_by']) && isset($parameters['order_type'])) {
                 $fast_order_by = $parameters['order_by'];
                 $fast_order_type = $parameters['order_type'];
@@ -299,8 +301,7 @@ class Database extends Mysql {
                 $fast_assign_to_me = '';
                 $order_by = 'ORDER BY ticket_priority.power ASC, tickets.id DESC';
             }
-
-
+    
             $search_in = '';
             if (isset($parameters['search']) && $parameters['search'] != null) {
                 $search = urldecode($parameters['search']);
@@ -308,10 +309,10 @@ class Database extends Mysql {
                 if ($search_in == 'all' || $search_in == null) {
                     $search_in = " AND (subject LIKE '%$search%' OR description LIKE '%$search%')";
                 } else {
-                    $search_in = " AND $serach_in LIKE '%$search%'";
+                    $search_in = " AND $search_in LIKE '%$search%'";
                 }
             }
-
+    
             $between = '';
             if (isset($parameters['from_date']) && $parameters['from_date'] != null) {
                 $from_date = strtotime($parameters['from_date']);
@@ -321,7 +322,7 @@ class Database extends Mysql {
                 $to_date = strtotime($parameters['to_date']);
                 $between = $between . " AND timecreated <= $to_date";
             }
-
+    
             $type_select = '';
             $status_select = '';
             $priority_select = '';
@@ -337,19 +338,47 @@ class Database extends Mysql {
                 $priority_select = $parameters['priority_select'];
                 $priority_select = " AND tickets.priority = $priority_select";
             }
-
+    
             $where = $search_in . $between . $type_select . $status_select . $priority_select;
-//Filter END!
-
-            $result_num = $this->query("SELECT count(tickets.status) as num, ticket_statuses.name, SUM(IF(tickets.duedate!=0 AND tickets.duedate<" . time() . ",1,0)) as expired FROM ticket_statuses INNER JOIN tickets ON ticket_statuses.id = tickets.status INNER JOIN projects ON projects.id=tickets.project $fast_watched_join WHERE for_account=" . ACCOUNT_ID . " AND projects.name='$this->project_name' $where $fast_assign_to_me $fast_watched_where GROUP BY ticket_statuses.name");
+            //Filter END!
+    
+            // Исправленный запрос для подсчёта тикетов по статусам
+            $result_num = $this->query("SELECT count(tickets.status) as num, ticket_statuses.name, SUM(IF(tickets.duedate!=0 AND tickets.duedate<" . time() . ",1,0)) as expired 
+                FROM ticket_statuses 
+                INNER JOIN tickets ON ticket_statuses.id = tickets.status 
+                INNER JOIN projects ON projects.id = tickets.project 
+                $fast_watched_join 
+                WHERE tickets.for_account=" . ACCOUNT_ID . " 
+                AND projects.for_account=" . ACCOUNT_ID . " 
+                AND projects.name='$this->project_name' 
+                $where $fast_assign_to_me $fast_watched_where 
+                GROUP BY ticket_statuses.name");
+    
             if ($result_num !== false) {
                 while ($row = $result_num->fetch_assoc()) {
                     $arr['nums'][$row['name']]['num'] = $row['num'];
                     $arr['nums'][$row['name']]['expired'] = $row['expired'];
                 }
             }
-
-            $result = $this->query("SELECT tickets.ticket_id, tickets.id, tickets.subject, tickets.send, tickets.message_uid, tickets.message_from_email, tickets.message_from_name, tickets.status, tickets.assignee as assignee_id, priority_colors.color, tickets.timecreated, users.fullname, users.username, users.image as assignee_image, usersA.id as addedby, ticket_types.name as type_name, tickets.duedate FROM tickets LEFT JOIN ticket_priority ON ticket_priority.id = tickets.priority INNER JOIN projects ON projects.id=tickets.project LEFT JOIN priority_colors ON priority_colors.for_id = ticket_priority.id LEFT JOIN users ON users.id = tickets.assignee LEFT JOIN users as usersA ON usersA.id = tickets.addedby LEFT JOIN ticket_types ON ticket_types.id = tickets.type $fast_watched_join WHERE tickets.for_account=" . ACCOUNT_ID . " AND projects.name='$this->project_name' $where $fast_assign_to_me $fast_watched_where $order_by");
+    
+            // Исправленный основной запрос для получения тикетов
+            $result = $this->query("SELECT tickets.ticket_id, tickets.id, tickets.subject, tickets.send, tickets.message_uid, tickets.message_from_email, tickets.message_from_name, tickets.status, tickets.assignee as assignee_id, priority_colors.color, tickets.timecreated, users.fullname, users.username, users.image as assignee_image, usersA.id as addedby, ticket_types.name as type_name, tickets.duedate 
+                FROM tickets 
+                LEFT JOIN ticket_priority ON ticket_priority.id = tickets.priority 
+                INNER JOIN projects ON projects.id = tickets.project 
+                LEFT JOIN priority_colors ON priority_colors.for_id = ticket_priority.id 
+                LEFT JOIN users ON users.id = tickets.assignee 
+                LEFT JOIN users as usersA ON usersA.id = tickets.addedby 
+                LEFT JOIN ticket_types ON ticket_types.id = tickets.type 
+                $fast_watched_join 
+                WHERE tickets.for_account=" . ACCOUNT_ID . " 
+                AND projects.for_account=" . ACCOUNT_ID . " 
+                AND (users.for_account=" . ACCOUNT_ID . " OR users.for_account IS NULL) 
+                AND (usersA.for_account=" . ACCOUNT_ID . " OR usersA.for_account IS NULL) 
+                AND projects.name='$this->project_name' 
+                $where $fast_assign_to_me $fast_watched_where 
+                $order_by");
+    
             if ($result !== false) {
                 while ($row = $result->fetch_assoc()) {
                     $arr['tickets'][] = $row;
@@ -360,11 +389,22 @@ class Database extends Mysql {
             (int) $id = $this->escape($id);
             if (!is_numeric($id) || $id === null)
                 return;
-            $result = $this->query("SELECT tickets.id, tickets.timecreated, tickets.send, tickets.message_to_email, tickets.ticket_id, tickets.message_uid, tickets.message_from_email, tickets.message_attachments, tickets.message_from_name, tickets.subject, tickets.description, ticket_types.name as type_name, ticket_statuses.name as status_name, ticket_priority.name as priority_name, tickets.estimated_seconds, tickets.duedate, tickets.lastupdate, tickets.pph, tickets.pph_c, usersA.fullname as assignee, usersA.username, usersA.id as assignee_id, usersB.fullname as addedby, usersB.id as addedby_id, priority_colors.color as priority_color FROM tickets INNER JOIN projects ON tickets.project = projects.id LEFT JOIN ticket_priority ON ticket_priority.id = tickets.priority LEFT JOIN ticket_statuses ON ticket_statuses.id = tickets.status LEFT JOIN ticket_types ON ticket_types.id = tickets.type LEFT JOIN users as usersA ON usersA.id = tickets.assignee LEFT JOIN users as usersB ON usersB.id=tickets.addedby LEFT JOIN priority_colors ON priority_colors.for_id=ticket_priority.id WHERE tickets.for_account=" . ACCOUNT_ID . " AND tickets.ticket_id = $id AND projects.abbr='$abbr'");
+            $result = $this->query("SELECT tickets.id, tickets.timecreated, tickets.send, tickets.message_to_email, tickets.ticket_id, tickets.message_uid, tickets.message_from_email, tickets.message_attachments, tickets.message_from_name, tickets.subject, tickets.description, ticket_types.name as type_name, ticket_statuses.name as status_name, ticket_priority.name as priority_name, tickets.estimated_seconds, tickets.duedate, tickets.lastupdate, tickets.pph, tickets.pph_c, usersA.fullname as assignee, usersA.username, usersA.id as assignee_id, usersB.fullname as addedby, usersB.id as addedby_id, priority_colors.color as priority_color 
+                FROM tickets 
+                INNER JOIN projects ON tickets.project = projects.id 
+                LEFT JOIN ticket_priority ON ticket_priority.id = tickets.priority 
+                LEFT JOIN ticket_statuses ON ticket_statuses.id = tickets.status 
+                LEFT JOIN ticket_types ON ticket_types.id = tickets.type 
+                LEFT JOIN users as usersA ON usersA.id = tickets.assignee 
+                LEFT JOIN users as usersB ON usersB.id=tickets.addedby 
+                LEFT JOIN priority_colors ON priority_colors.for_id=ticket_priority.id 
+                WHERE tickets.for_account=" . ACCOUNT_ID . " 
+                AND tickets.ticket_id = $id 
+                AND projects.abbr='$abbr'");
             return $result->fetch_assoc();
         }
     }
-
+    
     public function getTicketForEdit($abbr, $id) {
         $abbr = $this->escape($abbr);
         $id = $this->escape($id);
@@ -408,7 +448,7 @@ class Database extends Mysql {
         $post['pph'] = str_replace(",", ".", $post['pph']);
         $post['pph'] = number_format((int) $post['pph'], 2);
         $issue_links = array(
-            'ticket_1_id' => '', //it was set code below
+            'ticket_1_id' => '',
             'update' => $post['issue_links_updates'],
             'who_is' => $post['issue_links_who_is'],
             'origins' => $post['orig_issue_links_up'],
@@ -418,30 +458,34 @@ class Database extends Mysql {
         unset($post['issue_links'], $post['issue_links_types'], $post['issue_links_updates'], $post['issue_links_who_is'], $post['orig_issue_links_up']);
         if (empty($errors)) {
             if ($update == true) {
-                $update_info = ''; // Инициализируем пустую строку
+                $update_info = '';
                 $post['lastupdate'] = time();
                 $id = $this->escape($post['id']);
                 $tid = ticketAbbrParse(url_segment(3));
                 unset($post['id']);
-
+    
                 foreach ($post as $key => $val) {
                     $escaped_val = $this->escape($val);
                     $update_info .= $key . " = '" . $escaped_val . "',";
-
                 }
-                $update_info = rtrim($update_info, ","); // Убираем последнюю запятую
+                $update_info = rtrim($update_info, ",");
                 if (empty($update_info)) {
-                    $update_info = "lastupdate = '" . $this->escape($post['lastupdate']) . "'"; // Минимальное обновление
+                    $update_info = "lastupdate = '" . $this->escape($post['lastupdate']) . "'";
                 }
                 $sql = "UPDATE tickets SET $update_info WHERE for_account=" . ACCOUNT_ID . " AND id=$id LIMIT 1";
-
+    
                 $result = $this->query($sql);
                 $this->setTicketLog($this->user_id, $this->project_id, 'update', $tid['id'], $post['description']);
                 $last_id = $id;
             } else {
                 $post['for_account'] = ACCOUNT_ID;
                 $project_id = $this->getProjects($this->project_name);
-                $post['project'] = $project_id[0]['id'];
+                if (!empty($project_id)) { // Проверка на пустой результат
+                    $post['project'] = $project_id[0]['id'];
+                } else {
+                    error_log("setTicket: No project found for name: " . ($this->project_name ?? 'null')); // Логирование для отладки
+                    return ['error' => 'No project found for name: ' . ($this->project_name ?? 'null')];
+                }
                 $maxid = $this->query("SELECT MAX(ticket_id) as id FROM tickets WHERE for_account=" . ACCOUNT_ID . " AND project = " . $post['project']);
                 $post['ticket_id'] = $maxid->fetch_object()->id + 1;
                 if ($post['status'] == 4) {
@@ -455,16 +499,16 @@ class Database extends Mysql {
                 $result = $this->query($sql);
                 $last_id = $this->conn->insert_id;
             }
-
+    
             $issue_links['ticket_1_id'] = $last_id;
             $this->setIssueLinks($issue_links, $update);
-
+    
             $ready_watchers = $this->getWatchers($last_id);
             if (isset($ready_watchers['ids']) && $ready_watchers['ids'] !== null) {
-                $new_watchers = array_diff($watchers, $ready_watchers['ids']); //new watchers
+                $new_watchers = array_diff($watchers, $ready_watchers['ids']);
                 $deleted_watchers = array_diff($ready_watchers['ids'], $watchers);
             } else {
-                $new_watchers = $watchers; //new watchers
+                $new_watchers = $watchers;
             }
             $now = time();
             if (!empty($new_watchers)) {
@@ -489,7 +533,7 @@ class Database extends Mysql {
                 }
                 $this->query("DELETE FROM watchers WHERE user_id IN ($w_delete) AND ticket_id = $last_id AND for_account=" . ACCOUNT_ID);
             }
-
+    
             return $result;
         } else {
             return $errors;
@@ -565,13 +609,24 @@ class Database extends Mysql {
         $this->query("DELETE FROM comments WHERE ticket_id = '$id' AND for_account=" . ACCOUNT_ID);
         $this->query("DELETE FROM watchers WHERE ticket_id = '$id' AND for_account=" . ACCOUNT_ID);
         $res_id = $this->query("SELECT id FROM started_track_times WHERE ticket_id = '$id' AND for_account=" . ACCOUNT_ID);
-        $id_paused = $res_id->fetch_assoc()['id'];
-        $this->query("DELETE FROM paused_trackings WHERE for_id = $id_paused AND for_account=" . ACCOUNT_ID);
+        $id_paused = $res_id->fetch_assoc();
+        if ($id_paused) {
+            $this->query("DELETE FROM paused_trackings WHERE for_id = " . $id_paused['id'] . " AND for_account=" . ACCOUNT_ID);
+        }
         $this->query("DELETE FROM started_track_times WHERE ticket_id = '$id' AND for_account=" . ACCOUNT_ID);
         $t_abbr_id = $t_abbr_id['id'];
         $this->query("DELETE FROM saved_tracktimes WHERE project_id = '$project_id' AND ticket_id = '$t_abbr_id' AND for_account=" . ACCOUNT_ID);
         $this->query("DELETE FROM log_tickets WHERE project_id = '$project_id' AND ticket_id = '$t_abbr_id' AND for_account=" . ACCOUNT_ID);
         $this->query("DELETE FROM connected_tickets WHERE ticket_1 = $id OR ticket_2 = $id AND for_account=" . ACCOUNT_ID);
+    
+        // Добавляем лог удаления
+        $projects = $this->getProjects(); // Получаем проекты без фильтра по имени
+        if (!empty($projects)) {
+            $this->setTicketLog($this->user_id, $project_id, 'delete', $t_abbr_id);
+        } else {
+            error_log("deleteTicket: No projects found for account " . ACCOUNT_ID);
+        }
+    
         return $result;
     }
 
@@ -738,21 +793,22 @@ class Database extends Mysql {
         $project_id = $this->escape($project_id);
         $ticket_id = $this->escape($ticket_id);
         
-        // Первый запрос с отладкой
         $sql1 = "INSERT INTO log_tickets (for_account, user_id, project_id, time, event, text, ticket_id) VALUES (" . ACCOUNT_ID . ", $user_id, $project_id, $time, '$event', '$text', $ticket_id)";
-
         $res = $this->query($sql1);
         
         if ($res === true) {
             $log_id = $this->conn->insert_id;
-    
-            // Второй запрос с отладкой
             $sql2 = "SELECT id FROM tickets WHERE project = $project_id AND ticket_id = $ticket_id AND for_account=" . ACCOUNT_ID;
-
             $ticket_real_id = $this->query($sql2);
-            $t_id = $ticket_real_id->fetch_row()[0];
-    
-            $this->setNotifications($user_id, $t_id, $log_id, 0);
+            
+            // Проверка результата запроса
+            if ($ticket_real_id && $ticket_real_id->num_rows > 0) {
+                $t_id = $ticket_real_id->fetch_row()[0]; // строка 808
+                $this->setNotifications($user_id, $t_id, $log_id, 0);
+            } else {
+                // Тикет не найден — можно логировать ошибку или пропустить уведомления
+                error_log("setTicketLog: Тикет не найден для project_id=$project_id, ticket_id=$ticket_id, for_account=" . ACCOUNT_ID);
+            }
         }
     }
 
@@ -936,9 +992,37 @@ UNION
 
     public function getSettingsActivityLog($limit_from = 0, $limit_to = 10) {
         $arr = array();
-        $result = $this->query("(SELECT log_wiki.time, users.image, users.fullname, users.username, log_wiki.event, '0' as is_ticket, projects.name as p_name, '' as p_abbr, '' as ticket_id, '' as subject, '' as text, log_wiki.space_key, wiki_pages.title as page_title, log_wiki.page_id, wiki_pages.id as wiki_p_id, wiki_pages_updates.content, wiki_pages_updates.id as update_id FROM log_wiki INNER JOIN projects ON projects.id = log_wiki.project_id LEFT JOIN users ON users.id = log_wiki.user_id INNER JOIN wiki_pages ON wiki_pages.id = log_wiki.page_id LEFT JOIN wiki_pages_updates ON wiki_pages_updates.id = log_wiki.page_update_id WHERE log_wiki.for_account=" . ACCOUNT_ID . " ORDER BY log_wiki.time DESC LIMIT $limit_from, $limit_to) 
-UNION 
-(SELECT log_tickets.time, users.image, users.fullname, users.username, log_tickets.event, '1' as is_ticket, projects.name as p_name, projects.abbr as p_abbr, tickets.ticket_id, tickets.subject, log_tickets.text, '', '', '', '', '', '' FROM log_tickets INNER JOIN projects ON projects.id = log_tickets.project_id INNER JOIN tickets ON tickets.ticket_id = log_tickets.ticket_id AND tickets.project = log_tickets.project_id LEFT JOIN users ON users.id = log_tickets.user_id WHERE log_wiki.for_account=" . ACCOUNT_ID . " ORDER BY log_tickets.time DESC LIMIT $limit_from, $limit_to) ORDER BY time DESC");
+        // Экранируем параметры для безопасности
+        $limit_from = (int)$limit_from;
+        $limit_to = (int)$limit_to;
+        $account_id = (int)ACCOUNT_ID;
+    
+        $sql = "
+            (SELECT log_wiki.time, users.image, users.fullname, users.username, log_wiki.event, '0' as is_ticket, 
+                    projects.name as p_name, '' as p_abbr, '' as ticket_id, '' as subject, '' as text, 
+                    log_wiki.space_key, wiki_pages.title as page_title, log_wiki.page_id, wiki_pages.id as wiki_p_id, 
+                    wiki_pages_updates.content, wiki_pages_updates.id as update_id 
+             FROM log_wiki 
+             INNER JOIN projects ON projects.id = log_wiki.project_id 
+             LEFT JOIN users ON users.id = log_wiki.user_id 
+             INNER JOIN wiki_pages ON wiki_pages.id = log_wiki.page_id 
+             LEFT JOIN wiki_pages_updates ON wiki_pages_updates.id = log_wiki.page_update_id 
+             WHERE log_wiki.for_account = $account_id 
+             ORDER BY log_wiki.time DESC LIMIT $limit_from, $limit_to) 
+            UNION 
+            (SELECT log_tickets.time, users.image, users.fullname, users.username, log_tickets.event, '1' as is_ticket, 
+                    projects.name as p_name, projects.abbr as p_abbr, tickets.ticket_id, tickets.subject, log_tickets.text, 
+                    '', '', '', '', '', '' 
+             FROM log_tickets 
+             INNER JOIN projects ON projects.id = log_tickets.project_id 
+             INNER JOIN tickets ON tickets.ticket_id = log_tickets.ticket_id AND tickets.project = log_tickets.project_id 
+             LEFT JOIN users ON users.id = log_tickets.user_id 
+             WHERE log_tickets.for_account = $account_id 
+             ORDER BY log_tickets.time DESC LIMIT $limit_from, $limit_to) 
+            ORDER BY time DESC";
+    
+        $result = $this->query($sql);
+    
         if ($result !== false) {
             while ($row = $result->fetch_assoc()) {
                 $arr[] = $row;
@@ -1174,10 +1258,25 @@ UNION
         $where = 'WHERE for_account=' . ACCOUNT_ID;
         if ($search !== null) {
             $search = $this->escape($search);
-            $where = "WHERE fullname LIKE '%$search%' OR username LIKE '%$search%' AND for_account=" . ACCOUNT_ID;
+            $where = "WHERE (fullname LIKE '%$search%' OR username LIKE '%$search%') AND for_account=" . ACCOUNT_ID;
         }
         $result = $this->query("SELECT COUNT(*) as num FROM users $where");
-        return $result->fetch_assoc()['num'];
+        
+        // Проверяем, что запрос выполнился успешно
+        if ($result === false) {
+            // Если запрос не удался, можно вывести ошибку для отладки
+            error_log("Query failed: " . $this->conn->error);
+            return 0;
+        }
+        
+        // Извлекаем результат
+        $row = $result->fetch_assoc();
+        if ($row === null) {
+            // Если результат пуст, возвращаем 0
+            return 0;
+        }
+        
+        return $row['num']; // Возвращаем количество профилей
     }
 
     public function getUsers($start = 0, $limit = 0, $search = null, $id_or_name = 0) {
@@ -1269,8 +1368,8 @@ UNION
             $email = $arr['email'];
             $for_account = $arr['for_account'];
             $this->query("DELETE FROM pass_resets WHERE reset_code = '$code'");
-
-            $alphabet = ALLOWED_CHARS_PASS_GEN;
+    
+            $alphabet = ALLOWED_CHARS_GEN; // Используем существующую константу
             $pass = array();
             $alphaLength = strlen($alphabet) - 1;
             for ($i = 0; $i < 8; $i++) {
@@ -1588,17 +1687,24 @@ UNION
 
     public function deleteSpace($id) {
         $id = $this->escape($id);
-
+    
         $arr_p = array();
         $deleted_pages_ids = $this->query("SELECT id FROM wiki_pages WHERE for_space = $id AND for_account=" . ACCOUNT_ID);
+        
         if ($deleted_pages_ids !== false) {
             while ($row = $deleted_pages_ids->fetch_assoc()) {
                 $arr_p[] = $row['id'];
             }
-            $del_ids = implode(',', $arr_p);
-            $this->query("DELETE FROM wiki_pages_updates WHERE page_id IN ($del_ids) AND for_account=" . ACCOUNT_ID);
-            $this->query("DELETE FROM watchers WHERE page_id IN ($del_ids) AND for_account=" . ACCOUNT_ID);
+            
+            // Проверяем, есть ли ID для удаления
+            if (!empty($arr_p)) {
+                $del_ids = implode(',', $arr_p);
+                $this->query("DELETE FROM wiki_pages_updates WHERE page_id IN ($del_ids) AND for_account=" . ACCOUNT_ID);
+                $this->query("DELETE FROM watchers WHERE page_id IN ($del_ids) AND for_account=" . ACCOUNT_ID);
+            }
         }
+        
+        // Удаляем пространство и связанные страницы
         $this->query("DELETE FROM wiki_spaces WHERE id = $id AND for_account=" . ACCOUNT_ID);
         $this->query("DELETE FROM wiki_pages WHERE for_space = $id AND for_account=" . ACCOUNT_ID);
     }
@@ -1771,7 +1877,7 @@ UNION
     public function getCurrencies() {
         $arr = array();
         $result = $this->query("SELECT country, currency, (SELECT IF(currency IS NULL, 0, 1) FROM accounts WHERE accounts.currency=currencies.currency AND accounts.id=" . ACCOUNT_ID . ") as def FROM currencies");
-        if ($result !== false) {
+        if ($result !== false && $result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $arr[] = $row;
             }

@@ -4,7 +4,7 @@ if (!defined('APPLICATION_LOADED') || !APPLICATION_LOADED) {
     die('No direct script access.');
 }
 //Debug mode show every sql query on pages
-define('DEBUG_MODE', TRUE);
+define('DEBUG_MODE', FALSE);
 
 //ALLOWED CHARS FOR PASS GEN AND PASS RESET
 define('ALLOWED_CHARS_GEN', 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890');

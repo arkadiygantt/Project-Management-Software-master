@@ -215,7 +215,7 @@ class Main extends Database {
             $target_file = $where . basename($_FILES["image"]["name"]);
             $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
             $check = getimagesize($_FILES["image"]["tmp_name"]);
-            if ($check !== false && $imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg" || $imageFileType == "gif") {
+            if ($check !== false && ($imageFileType == "jpg" || $imageFileType == "png" || $imageFileType == "jpeg" || $imageFileType == "gif")) {
                 if (file_exists($target_file)) {
                     $_FILES["image"]["name"] = time() . $_FILES["image"]["name"];
                     $target_file = $where . basename($_FILES["image"]["name"]);
@@ -223,8 +223,8 @@ class Main extends Database {
                 $result_move = move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
                 if ($result_move === false) {
                     writeLog('Cant move uploaded image for login form from admin panel. Function move_uploaded_file return false!');
-                }
-                if ($_FILES['image']['error'] == 0) {
+                    $this->set_alert('Не удалось сохранить изображение! Проверьте папку для загрузки.', 'danger');
+                } else if ($_FILES['image']['error'] == 0) {
                     $image = $_FILES["image"]["name"];
                 } else {
                     $this->set_alert($this->lang_php['err_image_upload_status'] . ' - ' . $_FILES['image']['error'] . '!', 'danger');

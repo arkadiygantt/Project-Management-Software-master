@@ -32,6 +32,9 @@ class Mysql {
     }
 
     public function escape($value) {
+        if ($value === null) {
+            return ''; // Возвращаем пустую строку для null
+        }
         return trim(mysqli_real_escape_string($this->conn, $value));
     }
 

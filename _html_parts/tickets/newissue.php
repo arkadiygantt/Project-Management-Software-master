@@ -171,7 +171,7 @@ $currencies = $this->getCurrencies();
         <div class="form-group">
             <label class="control-label col-sm-2" for="duedate"><?= $this->lang_php['due_date'] ?></label>
             <div class="col-sm-10">
-                <input type="text" class="form-control date-pick" name="duedate" id="duedate" value="<?= $ticket_edit === true && !isset($_POST['setticket']) && $_POST['duedate'] > 0 ? date('d.m.Y', $_POST['duedate']) : isset($_POST['duedate']) ? $_POST['duedate'] : '' ?>" placeholder="dd.mm.yyy">
+                <input type="text" class="form-control date-pick" name="duedate" id="duedate" value="<?= ($ticket_edit === true && !isset($_POST['setticket']) && isset($_POST['duedate']) && is_numeric($_POST['duedate']) && $_POST['duedate'] > 0) ? date('d.m.Y', (int)$_POST['duedate']) : (isset($_POST['duedate']) ? htmlspecialchars($_POST['duedate'], ENT_QUOTES, 'UTF-8') : '') ?>" placeholder="dd.mm.yyy">
             </div>
         </div>
         <div class="form-group">

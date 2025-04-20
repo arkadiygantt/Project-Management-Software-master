@@ -5,7 +5,16 @@ if (!defined('APPLICATION_LOADED') || !APPLICATION_LOADED) {
 
 $this->title = $this->project_name . ' - ' . $this->lang_php['title_activity_stream'];
 
-$stream = $this->getTicketsActivityStream($this->user_id, $this->project_id);
+// Проверка инициализации
+if (empty($this->user_id) || empty($this->project_id)) {
+    die('User ID or Project ID not set');
+}
+
+$user_id = $this->escape($this->user_id);
+$project_id = $this->escape($this->project_id);
+$stream = $this->getTicketsActivityStream($user_id, $project_id);
+//var_dump($stream); // Раскомментируйте для отладки
+
 require 'templates/activitystream.php';
 ?>
 <h1><?= $this->lang_php['activity'] ?></h1>
@@ -18,7 +27,6 @@ require 'templates/activitystream.php';
                 <h3><?= $this->lang_php['if_you_are_new'] ?> <a href="http://pmticket.com/more-about-ticketing-system" target="_blank"><?= $this->lang_php['guide'] ?></a>!</h3>
             </div>
         </div>
-
     </div>
     <div class="col-sm-6">
         <div class="panel panel-info">
@@ -46,11 +54,11 @@ require 'templates/activitystream.php';
                     ?>
                     <div id="other-ajax"></div>
                     <a href="javascript:void(0)" onClick="showMore(<?= $this->user_id ?>, <?= $this->project_id ?>, false)" class="bordered text-center show-more"><?= $this->lang_php['show_more'] ?> <i class="fa fa-chevron-circle-down"></i></a>
-                        <?php
-                    } else {
-                        ?>
-                        <?= $this->lang_php['no_activity'] ?>
-                    <?php } ?>
+                    <?php
+                } else {
+                    ?>
+                    <?= $this->lang_php['no_activity'] ?>
+                <?php } ?>
             </div>
         </div>
     </div>
