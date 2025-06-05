@@ -24,7 +24,7 @@ var lang = {
     highcharts_monthly_closed: "Закрыто за месяц",
     highcharts_by_priority: "Процент тикетов по приоритету",
     highcharts_priority: "Приоритет",
-    highcharts_monthly_created_pages amacıyla: "Создано страниц за месяц",
+    highcharts_monthly_created_pages: "Создано страниц за месяц",
     username_wrong: "Неверное имя пользователя!",
     username_must_be: "Должно содержать 4 или более символов, менее 20 символов и только буквы и цифры!",
     username_taken: "Имя пользователя занято!",
@@ -63,4 +63,5 @@ var lang = {
     folder: "папка",
     username: "пользователь",
     password: "пароль"
+
 };

@@ -392,3 +392,81 @@ Domain:localhost
 New Exception:Access denied for user 'root'@'localhost' (using password: NO)
 
 
+Time: 2025.04.24 16.04.45
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.04.25 07.04.38
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.04.26 19.04.06
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.03 20.05.44
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.04 00.05.51
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Cant move uploaded image for login form from admin panel. Function move_uploaded_file return false!
+Cant move uploaded image for login form from admin panel. Function move_uploaded_file return false!
+Cant move uploaded image for login form from admin panel. Function move_uploaded_file return false!
+Time: 2025.05.13 11.05.57
+Domain:localhost
+New Exception:Duplicate entry 'vip.makhlaev@mail.ru-1' for key 'email'
+
+
+Time: 2025.05.22 15.05.03
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.24 15.05.51
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.24 18.05.42
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.25 11.05.07
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.25 21.05.19
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.27 14.05.23
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.05.31 08.05.27
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.06.03 17.06.32
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+
+Time: 2025.06.04 01.06.01
+Domain:localhost
+New Exception:Access denied for user 'root'@'localhost' (using password: NO)
+
+

@@ -1841,7 +1841,7 @@ UNION
                 $proj_id = $this->escape($find['project']);
                 $where .= "WHERE wiki_spaces.project_id = $proj_id AND wiki_spaces.for_account=" . ACCOUNT_ID;
             }
-
+    
             $from_date = $find['from_date'] != '' ? strtotime($find['from_date']) : 0;
             $to_date = $find['to_date'] != '' ? strtotime($find['to_date']) : 0;
             if ($from_date != 0 || $to_date != 0) {
@@ -1849,11 +1849,11 @@ UNION
                     $a = 'WHERE';
                 else
                     $a = 'AND';
-                $where .= " $a wiki_pages.created BETWEEN $from_date AND $to_date AND wiki_pages=" . ACCOUNT_ID;
+                // Исправлено: wiki_pages.for_account вместо wiki_pages
+                $where .= " $a wiki_pages.created BETWEEN $from_date AND $to_date AND wiki_pages.for_account=" . ACCOUNT_ID;
             }
-            ;
         }
-
+    
         $arr = array();
         $result = $this->query("SELECT wiki_pages.created, wiki_spaces.name as space_name FROM wiki_pages INNER JOIN wiki_spaces ON wiki_spaces.id = wiki_pages.for_space INNER JOIN projects ON wiki_spaces.project_id = projects.id $where ORDER BY wiki_pages.created ASC");
         if ($result !== false && $result->num_rows > 0) {
@@ -1861,7 +1861,7 @@ UNION
                 $arr['months'][date('M-Y', $row['created'])] = 0;
                 $as[] = $row;
             }
-
+    
             $added = array();
             foreach ($as as $rr) {
                 if (!in_array($rr['space_name'], $added)) {

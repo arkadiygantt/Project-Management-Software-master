@@ -118,7 +118,7 @@ if (isset($_POST['update'])) {
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="activity-tickets">
                                             <p>
-                                                <?= $stream_t['mine'] !== null ? activityForeach($stream_t['mine']) : 'No Activity' ?>
+                                                <?= (isset($stream_t['mine']) && $stream_t['mine'] !== null) ? activityForeach($stream_t['mine']) : 'Нет активности' ?>
                                             <div id="mine-ajax"></div>
                                             </p>
                                             <p>

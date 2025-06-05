@@ -83,18 +83,29 @@ $projects_list = $this->getProjects();
                             $months_created = rtrim($months_created, ",");
                         }
 
-                        if ($res_tickets['num_closed'] != null) {
-                            $months_closed = "";
-                            foreach ($res_tickets['num_closed'] as $p => $m) {
+                        // Инициализируем переменные, чтобы избежать ошибок с неопределёнными значениями
+                    $months_closed = "";
+                    $colors_c = "";
+
+                    // Проверяем наличие ключа 'num_closed' и его тип
+                    if (isset($res_tickets['num_closed']) && is_array($res_tickets['num_closed'])) {
+                        $color_c = array(); // Создаём массив для цветов
+                        foreach ($res_tickets['num_closed'] as $p => $m) {
+                            // Проверяем наличие нужных ключей и их корректность
+                            if (isset($m['color']) && isset($m['nums']) && is_array($m['nums'])) {
                                 $color_c[] = $m['color'];
                                 $months_closed .= "{";
                                 $months_closed .= "name: '$p',";
                                 $months_closed .= "data: [" . implode(', ', $m['nums']) . "]";
                                 $months_closed .= "},";
                             }
+                        }
+                        // Формируем результат только если есть данные
+                        if (!empty($color_c)) {
                             $colors_c = "'" . implode("', '", $color_c) . "'";
                             $months_closed = rtrim($months_closed, ",");
                         }
+                    }
 
                         $percents_tickets = '';
                         foreach ($res_tickets['num_for_priority'] as $pr => $num_p) {
@@ -320,9 +331,10 @@ $projects_list = $this->getProjects();
                                             <div class="alert alert-info"><?= $this->lang_php['no_stat_for_tickets'] ?></div>
                                             <?php
                                         }
-                                        if (!empty($res_tickets) && $res_tickets['num_closed'] != null) {
+                                        if (!empty($months_closed)) {
                                             ?>
-                                            <script>$(function () {
+                                            <script>
+                                                $(function () {
                                                     $('#monthly-closed-tickets').highcharts({
                                                         title: {
                                                             text: lang.highcharts_monthly_closed,
@@ -357,7 +369,7 @@ $projects_list = $this->getProjects();
                                             </script>
                                             <div id="monthly-closed-tickets"></div>
                                             <hr>
-                                        <?php } else { ?>
+                                            <?php } else { ?>
                                             <div class="alert alert-info"><?= $this->lang_php['no_stat_for_tickets_closed'] ?></div>
                                             <?php
                                         }
@@ -995,8 +1007,11 @@ $projects_list = $this->getProjects();
                                                 data: {uid: id}
                                             }).done(function (data) {
                                                 var info = JSON.parse(data);
-                                                var projects = info.projects.split(",");
-                                                var privileges = info.privileges.split(",");
+
+                                                // Удаляем пробелы из привилегий пользователя
+                                                var userPrivileges = info.privileges.replace(/\s+/g, '');
+
+                                                // Заполняем форму
                                                 $('#addUser').modal('show');
                                                 $("[name='update']").val(id);
                                                 $("[name='username']").val(info.username);
@@ -1010,6 +1025,8 @@ $projects_list = $this->getProjects();
                                                 $("[name='linkedin']").val(info.social.linkedin);
                                                 $("[name='skype']").val(info.social.skype);
                                                 $("[name='email']").val(info.email);
+
+                                                // Обработка языка
                                                 if (info.lang != null) {
                                                     $("[name='lang']").prop("disabled", false);
                                                     $('#default_lang').prop("checked", false);
@@ -1017,30 +1034,27 @@ $projects_list = $this->getProjects();
                                                         return $(this).text() == info.lang;
                                                     }).prop('selected', true);
                                                 }
+
+                                                // Обработка привилегий
+                                                $("#privileges option").prop('selected', false); // Сбрасываем выбор
+                                                $("#privileges option").each(function() {
+                                                    var optionValue = this.value.replace(/\s+/g, '');
+                                                    if (optionValue === userPrivileges) {
+                                                        $(this).prop('selected', true);
+                                                    }
+                                                });
+
+                                                // Остальная логика
                                                 $("#prof-list option").filter(function () {
                                                     return $(this).text() == info.profession_name;
                                                 }).prop('selected', true);
                                                 $(".proj-checkbox").filter(function () {
-                                                    return info.projects.contains(this.value);
+                                                    return info.projects.includes(this.value); // Заменяем contains на includes
                                                 }).prop('checked', true);
-                                                var priv_cust = true;
-                                                $("#privileges option").filter(function () {
-                                                    if (this.value == info.privileges) {
-                                                        priv_cust = false;
-                                                    }
-                                                    return this.value == info.privileges;
-                                                }).prop('selected', true);
-                                                if (priv_cust == true) {
-                                                    $("#custom-privileges-cancel, #privileges-types").show();
-                                                    $("#privileges, #custom-privileges").hide();
-                                                    $("[name='costom-privileges']").val(1);
-                                                    $(".usrtype-checkbox").filter(function () {
-                                                        return info.privileges.contains(this.value);
-                                                    }).prop('checked', true);
-                                                }
                                             });
                                         }
 
+                                        
                     </script>
                     <?php
                 } elseif (url_segment(1) !== false && url_segment(1) == 'projects') {
@@ -1261,7 +1275,7 @@ $projects_list = $this->getProjects();
                                     <th><?= $this->lang_php['space_key'] ?></th>
                                     <th><?= $this->lang_php['description'] ?></th>
                                     <th><?= $this->lang_php['image'] ?></th>
-                                    <th><?= $this->lang_php['pages'] ?></th>
+                                    <th><?= $this->lang_php['num_pages'] ?></th>
                                     <th><?= $this->lang_php['project'] ?></th>
                                     <th><?= $this->lang_php['time_created'] ?></th>
                                     <th class="text-center"><?= $this->lang_php['edit'] ?></th>
@@ -1271,7 +1285,7 @@ $projects_list = $this->getProjects();
                             <tbody>
                                 <?php foreach ($spaces as $space) { ?>
                                     <tr>
-                                        <td>
+                                    <td>
                                             <?= $space['name'] ?>
                                         </td>
                                         <td>

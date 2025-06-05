@@ -6,7 +6,7 @@ if (isset($_SESSION['logged']) || isset($_COOKIE['logged'])) {
     ?>
     <footer class="blue-gradient">
         <div>
-            Project Management Software  
+            Project and resource management system for IT-companies  
             &middot;
             <a href="https://github.com/issue-tracking-system/Project-Management-Software/issues" target="_blank">Report a Bug <i class="fa fa-bug" aria-hidden="true"></i></a>
         </div>

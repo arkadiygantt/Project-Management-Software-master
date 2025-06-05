@@ -345,6 +345,7 @@ $LANG = array(
     'find_by_word' => 'Find by subject',
     'recent_projects' => 'Recent projects',
     'current_project' => 'Current project',
-    'page_update_error' => 'Page update error. Are you sure that you have typed more than 3 characters in title?'
+    'page_update_error' => 'Page update error. Are you sure that you have typed more than 3 characters in title?',
+    'num_pages' => 'Number of page'
 );
 ?>
